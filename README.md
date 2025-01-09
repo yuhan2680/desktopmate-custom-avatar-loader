@@ -3,6 +3,7 @@
 This mod unlocks the hidden VRoid Hub menu inside of DesktopMate and copies some parameters and adjusts the application UI to help the user easily change the model and transfer animations!
 
 *Currently only transfers the animations of the default character. Support for transferring Miku's animations will be added if I ever buy the DLC and reverse engineer that*
+### Miku DLC users must change the character to the base character before installing the mod!!!
 
 ## Installation
 - Install the latest [MelonLoader](https://github.com/LavaGang/MelonLoader/releases/download/v0.6.6/MelonLoader.Installer.exe) version to DesktopMate (v0.6.6 is the recommended one)
