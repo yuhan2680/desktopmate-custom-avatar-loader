@@ -7,9 +7,9 @@ This mod unlocks the hidden VRoid Hub menu inside of DesktopMate and copies some
 ## Installation
 - Install the latest [MelonLoader](https://github.com/LavaGang/MelonLoader/releases/download/v0.6.6/MelonLoader.Installer.exe) version to DesktopMate (v0.6.6 is the recommended one)
 - Run DesktopMate once (and make sure there is a command prompt application popping up)
-- Close DesktopMate and download the [VroidHubLoader.dll]([https:](https://github.com/YusufOzmen01/desktopmate-vroidhub-mod/releases/download/v1.0.0/VroidHubLoader.dll)) file from here or the releases and put it into the Mods file inside of DesktopMate
+- Close DesktopMate and download the [VroidHubLoader.dll](https://github.com/YusufOzmen01/desktopmate-vroidhub-mod/releases/download/v1.0.0/VroidHubLoader.dll) file from here or the releases and put it into the Mods file inside of DesktopMate
 
-## [Click here for a video tutorial on how to use the mod]()
+## [Click here for a video tutorial on how to use the mod](https://youtu.be/V4lcHxlpO7M)
 
 ## How to use 
 TO BE WRITTEN, WATCH THE VIDEO FOR NOW
