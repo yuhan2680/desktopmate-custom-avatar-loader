@@ -70,7 +70,6 @@ namespace MelonLoaderMod1
                     charaAnimator.runtimeAnimatorController = runtimeAnimatorController;
 
                     LoggerInstance.Msg("Chara replaced!");
-                    Thread.Sleep(1000);
                     GameObject.Find("/MenuCanvas/MenuParent/Old").SetActive(false);
                     GameObject.Find("/UniWindowController").GetComponent<UniWindowController>().isTransparent = true;
                     LoggerInstance.Msg("UI fixed!");
