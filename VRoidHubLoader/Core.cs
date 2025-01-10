@@ -1,10 +1,10 @@
 ﻿using MelonLoader;
 using UnityEngine;
 using Il2Cpp;
-using Il2CppKirurobo;
-using Il2CppVRoidSDK.Examples.CharacterModelExample;
+using Il2CppUniGLTF;
+using Il2CppUniVRM10;
 
-[assembly: MelonInfo(typeof(MelonLoaderMod1.Core), "VRoid Hub Loader Mod", "1.0.1", "SergioMarquina", null)]
+[assembly: MelonInfo(typeof(MelonLoaderMod1.Core), "Custom Avatar Loader Mod", "1.0.2", "SergioMarquina", null)]
 [assembly: MelonGame("infiniteloop", "DesktopMate")]
 
 namespace MelonLoaderMod1
@@ -12,79 +12,76 @@ namespace MelonLoaderMod1
     public class Core : MelonMod
     {
         CharaData charaData;
-        GameObject chara;
         RuntimeAnimatorController runtimeAnimatorController;
-        string appId = "hpEHG3NgEuJ4OhA0qs-eVzKGQgEIobzDdv_S7j174ww", appSecret = "JzSrNcDtPl4SqTELw14N1waPLJSZz5Kxv1Xg6YEMVX0";
-        bool cloned = false, replaced = false;
-
         public override void OnUpdate()
         {
-            if (!cloned)
+            if (Input.GetKeyDown(KeyCode.F4))
             {
-                chara = GameObject.Find("iltan_prefab(Clone)");
-                if (chara != null)
+                var dlg = new OpenFileDialog();
+                dlg.Filter = "VRM Files (*.vrm)|*.vrm";
+                dlg.Multiselect = false;
+
+                if (dlg.ShowDialog() != DialogResult.OK)
                 {
-                    charaData = chara.GetComponent<CharaData>();
-                    runtimeAnimatorController = chara.GetComponent<Animator>().runtimeAnimatorController;
+                    LoggerInstance.Error("Error opening file dialog!");
 
-                    LoggerInstance.Msg("Chara copied! Removing default chara...");
-                    chara.SetActive(false);
-                    cloned = true;
-
-                    UnityEngine.Object.Destroy(chara);
-                    Thread.Sleep(1000);
-                    GameObject.Find("/MenuCanvas/MenuParent/Old").SetActive(true);
-                    GameObject.Find("/MenuCanvas/MenuParent/Old/ModelPageOld").SetActive(true);
-
-                    GameObject.Find("/UniWindowController").GetComponent<UniWindowController>().isTransparent = false;
-                    LoggerInstance.Msg("VRoid Hub menu enabled!");
-
-                    GameObject routes = GameObject.Find("/VRoidHubController/Routes");
-                    Routes routesComponent = routes.GetComponent<Routes>();
-
-                    routesComponent._apiController._api._client.Cast<Il2CppPixiv.VroidSdk.Oauth.Client>()._config.Credential.ApplicationId = appId;
-                    routesComponent._apiController._api._client.Cast<Il2CppPixiv.VroidSdk.Oauth.Client>()._config.Credential.Secret = appSecret;
-
-                    LoggerInstance.Msg("VRoid Hub credentials updated!");
+                    return;
                 }
 
-                return;
-            }
-
-            if (!replaced)
-            {
-                chara = GameObject.Find("VRM1");
-                Screen.SetResolution(800, 600, false);
-                if (chara != null)
+                GameObject newChara;
+                try
                 {
-                    CharaData newCharaData = chara.AddComponent<CharaData>();
-                    newCharaData.alarmAnim = charaData.alarmAnim;
-                    newCharaData.draggedAnims = charaData.draggedAnims;
-                    newCharaData.hideLeftAnims = charaData.hideLeftAnims;
-                    newCharaData.hideRightAnims = charaData.hideRightAnims;
-                    newCharaData.jumpInAnim = charaData.jumpInAnim;
-                    newCharaData.jumpOutAnim = charaData.jumpOutAnim;
-                    newCharaData.pickedSittingAnim = charaData.pickedSittingAnim;
-                    newCharaData.pickedStandingAnim = charaData.pickedStandingAnim;
-                    newCharaData.sittingOneShotAnims = charaData.sittingOneShotAnims;
-                    newCharaData.sittingRandomAnims = charaData.sittingRandomAnims;
-                    newCharaData.standingOneShotAnims = charaData.standingOneShotAnims;
-                    newCharaData.standingRandomAnims = charaData.standingRandomAnims;
-                    newCharaData.strokedSittingAnim = charaData.strokedSittingAnim;
-                    newCharaData.strokedStandingAnim = charaData.strokedStandingAnim;
+                    var data = new GlbFileParser(dlg.FileName).Parse();
+                    var context = new Vrm10Importer(new Vrm10Data(data, new Vrm10ImportData(data).gltfVrm));
+                    var loaded = context.Load();
 
-                    Animator charaAnimator = chara.GetComponent<Animator>();
-                    charaAnimator.applyRootMotion = true;
-                    charaAnimator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
-                    charaAnimator.runtimeAnimatorController = runtimeAnimatorController;
-
-                    LoggerInstance.Msg("Chara replaced!");
-                    GameObject.Find("/MenuCanvas/MenuParent/Old").SetActive(false);
-                    GameObject.Find("/UniWindowController").GetComponent<UniWindowController>().isTransparent = true;
-                    LoggerInstance.Msg("UI fixed!");
-
-                    replaced = true;
+                    loaded.EnableUpdateWhenOffscreen();
+                    loaded.ShowMeshes();
+                    newChara = loaded.gameObject;
                 }
+                catch (Exception e)
+                {
+                    LoggerInstance.Error("Error trying to load the VRM file! : " + e.Message);
+
+                    MessageBox.Show("This VRM file seems to be either incompatible or corrupt! Please try a different model file.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    return;
+                }
+                
+                var chara = GameObject.Find("/CharactersRoot").transform.GetChild(0).gameObject;
+                charaData = chara.GetComponent<CharaData>();
+                runtimeAnimatorController = chara.GetComponent<Animator>().runtimeAnimatorController;
+
+                LoggerInstance.Msg("Chara copied! Removing default chara...");
+                UnityEngine.Object.Destroy(chara);
+
+                newChara.transform.parent = GameObject.Find("/CharactersRoot").transform;
+
+                CharaData newCharaData = newChara.AddComponent<CharaData>();
+                newCharaData.alarmAnim = charaData.alarmAnim;
+                newCharaData.draggedAnims = charaData.draggedAnims;
+                newCharaData.hideLeftAnims = charaData.hideLeftAnims;
+                newCharaData.hideRightAnims = charaData.hideRightAnims;
+                newCharaData.jumpInAnim = charaData.jumpInAnim;
+                newCharaData.jumpOutAnim = charaData.jumpOutAnim;
+                newCharaData.pickedSittingAnim = charaData.pickedSittingAnim;
+                newCharaData.pickedStandingAnim = charaData.pickedStandingAnim;
+                newCharaData.sittingOneShotAnims = charaData.sittingOneShotAnims;
+                newCharaData.sittingRandomAnims = charaData.sittingRandomAnims;
+                newCharaData.standingOneShotAnims = charaData.standingOneShotAnims;
+                newCharaData.standingRandomAnims = charaData.standingRandomAnims;
+                newCharaData.strokedSittingAnim = charaData.strokedSittingAnim;
+                newCharaData.strokedStandingAnim = charaData.strokedStandingAnim;
+
+                MainManager manager = GameObject.Find("MainManager").GetComponent<MainManager>();
+                manager.charaData = newCharaData;
+
+                Animator charaAnimator = newChara.GetComponent<Animator>();
+                charaAnimator.applyRootMotion = true;
+                charaAnimator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+                charaAnimator.runtimeAnimatorController = runtimeAnimatorController;
+
+                LoggerInstance.Msg("Chara replaced!");
             }
         }
     }
