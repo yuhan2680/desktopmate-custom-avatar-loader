@@ -1,6 +1,14 @@
 # Custom Avatar Loader Mod for Desktop Mate
 
+<div align="center">
+<a href="https://buymeacoffee.com/sergiomarquina">
+<img src="https://i.imgur.com/l7NBjqk.png" alt="drawing" width="150" height="45" align="center">
+</a>
+<br><br>
 This mod lets you use any .VRM file model you want inside of Desktop Mate!
+</div>
+
+
 ## Installation
 - Install the latest [MelonLoader](https://github.com/LavaGang/MelonLoader/releases/download/v0.6.6/MelonLoader.Installer.exe) version to DesktopMate (v0.6.6 is the recommended one)
 - Run DesktopMate once (and make sure there is a command prompt application popping up)
