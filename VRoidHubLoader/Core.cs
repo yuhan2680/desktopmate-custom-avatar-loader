@@ -2,8 +2,9 @@
 using UnityEngine;
 using Il2Cpp;
 using Il2CppKirurobo;
+using Il2CppVRoidSDK.Examples.CharacterModelExample;
 
-[assembly: MelonInfo(typeof(MelonLoaderMod1.Core), "VRoid Hub Loader Mod", "1.0.0", "SergioMarquina", null)]
+[assembly: MelonInfo(typeof(MelonLoaderMod1.Core), "VRoid Hub Loader Mod", "1.0.1", "SergioMarquina", null)]
 [assembly: MelonGame("infiniteloop", "DesktopMate")]
 
 namespace MelonLoaderMod1
@@ -13,7 +14,7 @@ namespace MelonLoaderMod1
         CharaData charaData;
         GameObject chara;
         RuntimeAnimatorController runtimeAnimatorController;
-
+        string appId = "hpEHG3NgEuJ4OhA0qs-eVzKGQgEIobzDdv_S7j174ww", appSecret = "JzSrNcDtPl4SqTELw14N1waPLJSZz5Kxv1Xg6YEMVX0";
         bool cloned = false, replaced = false;
 
         public override void OnUpdate()
@@ -36,8 +37,15 @@ namespace MelonLoaderMod1
                     GameObject.Find("/MenuCanvas/MenuParent/Old/ModelPageOld").SetActive(true);
 
                     GameObject.Find("/UniWindowController").GetComponent<UniWindowController>().isTransparent = false;
-                    Screen.SetResolution(800, 600, false);
                     LoggerInstance.Msg("VRoid Hub menu enabled!");
+
+                    GameObject routes = GameObject.Find("/VRoidHubController/Routes");
+                    Routes routesComponent = routes.GetComponent<Routes>();
+
+                    routesComponent._apiController._api._client.Cast<Il2CppPixiv.VroidSdk.Oauth.Client>()._config.Credential.ApplicationId = appId;
+                    routesComponent._apiController._api._client.Cast<Il2CppPixiv.VroidSdk.Oauth.Client>()._config.Credential.Secret = appSecret;
+
+                    LoggerInstance.Msg("VRoid Hub credentials updated!");
                 }
 
                 return;
@@ -46,6 +54,7 @@ namespace MelonLoaderMod1
             if (!replaced)
             {
                 chara = GameObject.Find("VRM1");
+                Screen.SetResolution(800, 600, false);
                 if (chara != null)
                 {
                     CharaData newCharaData = chara.AddComponent<CharaData>();
