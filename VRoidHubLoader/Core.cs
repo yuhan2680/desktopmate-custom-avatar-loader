@@ -42,6 +42,7 @@ namespace MelonLoaderMod1
                 {
                     vrmPath.Value = dlg.FileName;
                     init = true;
+                    MelonPreferences.Save();
                 }
             }
 
@@ -128,7 +129,6 @@ namespace MelonLoaderMod1
             charaAnimator.runtimeAnimatorController = runtimeAnimatorController;
 
             LoggerInstance.Msg("Chara replaced!");
-            MelonPreferences.Save();
 
             return true;
         }
