@@ -142,7 +142,7 @@
 			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Desktop Mate\MelonLoader\Il2CppAssemblies\Il2Cpp__Generated.dll</HintPath>
 		</Reference>
 		<Reference Include="System.Windows.Forms">
-		  <HintPath>C:\SteamLibrary\steamapps\common\Desktop Mate\UserLibs\System.Windows.Forms.dll</HintPath>
+		  <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Desktop Mate\UserLibs\System.Windows.Forms.dll</HintPath>
 		</Reference>
 		<Reference Include="Unity.2D.Animation.Runtime">
 			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Desktop Mate\MelonLoader\Il2CppAssemblies\Unity.2D.Animation.Runtime.dll</HintPath>
