@@ -34,3 +34,5 @@ Discordサーバーへの参加も忘れずに！<br>
 
 # ライセンス
 詳細は[LICENSE.md](LICENSE.md)をご確認ください
+
+翻訳者: [モブ](https://x.com/Trinity_96MOB)
