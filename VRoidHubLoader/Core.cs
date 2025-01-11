@@ -112,7 +112,7 @@
         {
             if (!File.Exists(path))
             {
-                LoggerInstance.Error("VRM file does not exist: " + path);
+                Logger.Error("VRM file does not exist: " + path);
                 return false;
             }
 
@@ -139,9 +139,9 @@
                 loaded.gameObject.name = "VRMFILE";
                 newChara = loaded.gameObject;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                LoggerInstance.Error("Error trying to load the VRM file! : " + e.Message);
+                Logger.Error("Error trying to load the VRM file!", ex);
                 return false;
             }
 
@@ -149,7 +149,7 @@
             CharaData = chara.GetComponent<CharaData>();
             RuntimeAnimatorController = chara.GetComponent<Animator>().runtimeAnimatorController;
 
-            LoggerInstance.Msg("Chara copied! Removing default chara...");
+            Logger.Debug("Chara copied! Removing default chara...");
             UnityEngine.Object.Destroy(chara);
 
             newChara.transform.parent = GameObject.Find("/CharactersRoot").transform;
@@ -165,7 +165,7 @@
             charaAnimator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
             charaAnimator.runtimeAnimatorController = RuntimeAnimatorController;
 
-            LoggerInstance.Msg("Chara replaced!");
+            Logger.Debug("Chara replaced!");
 
             return true;
         }
