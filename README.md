@@ -29,7 +29,8 @@ This mod lets you use any .VRM file model you want inside of Desktop Mate!
 
 ## Notes for Development
 - Make sure you have .NET Runtime 6.0 and .NET Desktop Support installed for Visual Studio
-- Also, install [MelonLoader's VSIX](https://github.com/TrevTV/MelonLoader.VSWizard/releases) for developing mods
+- Install [MelonLoader's VSIX](https://github.com/TrevTV/MelonLoader.VSWizard/releases) for developing mods
+- Also, you might need to install Desktop Mate into C drive as it might behave a bit unexpected
 
 # License
 Check the [LICENSE.md](LICENSE.md) file for details
