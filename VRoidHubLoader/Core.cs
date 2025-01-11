@@ -45,42 +45,37 @@ public class Core : MelonMod
 
         var hasLatestVersion = VersionChecker.IsLatestVersionInstalled(CurrentVersion);
 
-        if (!hasLatestVersion)
+       if (!hasLatestVersion)
         {
-            Logger.Info($"[VersionCheck] New version available");
+            Logger.Info("[VersionCheck] New version available");
 
-            DialogResult result = System.Windows.Forms.MessageBox.Show(
-                $"A new version of the custom avatar loader is available - do you want to download it?",
-                "Update Available",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+            const uint MB_YESNO = 0x00000004;
+            const uint MB_ICONQUESTION = 0x00000020;
+
+            int result = MessageBox(IntPtr.Zero, 
+                "A new version of the custom avatar loader is available - do you want to download it?", 
+                "Update Available", 
+                MB_YESNO | MB_ICONQUESTION);
 
             switch (result)
             {
-                case DialogResult.Yes:
+                case 6: // IDYES
+                    Process.Start(new ProcessStartInfo
                     {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = $"https://github.com/{REPOSITORY_NAME}/releases",
-                            UseShellExecute = true
-                        });
+                        FileName = $"https://github.com/{REPOSITORY_NAME}/releases",
+                        UseShellExecute = true
+                    });
+                    break;
 
-                        break;
-                    }
-
-                case DialogResult.No:
-                    {
-                        Logger.Info("[VersionCheck] User chose to skip update for now.");
-                        break;
-                    }
+                case 7: // IDNO
+                    Logger.Info("[VersionCheck] User chose to skip update for now.");
+                    break;
             }
         }
         else
         {
             Logger.Info("[VersionCheck] Latest version installed");
         }
-    }
 
     public override void OnUpdate()
     {
