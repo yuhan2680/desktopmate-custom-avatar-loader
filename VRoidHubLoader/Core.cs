@@ -1,152 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Windows.Forms; // May not be available on all platforms
-using CustomAvatarLoader;
-using Il2Cpp;
-using Il2CppUniGLTF;
-using Il2CppUniVRM10;
-using MelonLoader;
-using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
-
-[assembly: MelonInfo(typeof(Core), "Custom Avatar Loader Mod", "1.0.2", "SergioMarquina, Misandrie")]
-[assembly: MelonGame("infiniteloop", "DesktopMate")]
-
-namespace CustomAvatarLoader
+﻿namespace CustomAvatarLoader
 {
+    using CustomAvatarLoader.Logging;
+    using CustomAvatarLoader.Versioning;
+    using Il2Cpp;
+    using Il2CppUniGLTF;
+    using Il2CppUniVRM10;
+    using MelonLoader;
+    using System.Reflection;
+    using System.Windows.Forms;
+    using UnityEngine;
+
     public class Core : MelonMod
     {
-        private string CurrentVersion =>
-            MelonAssembly.Assembly
-                .GetCustomAttribute<MelonInfoAttribute>()
-                ?.Version ?? "Unknown";
+        private bool init;
 
-        private MelonPreferences_Category _settings;
-        private MelonPreferences_Entry<string> _vrmPath;
+        protected const string REPOSITORY_NAME = "YusufOzmen01/desktopmate-custom-avatar-loader";
 
-        private CharaData _charaData;
-        private RuntimeAnimatorController _runtimeAnimatorController;
-        private bool _init;
+        protected virtual Logging.ILogger Logger { get; private set; }
+
+        protected virtual GitHubVersionChecker VersionChecker { get; private set; }
+
+        protected virtual string CurrentVersion { get; private set; }
+
+        protected virtual MelonPreferences_Category Settings { get; private set; }
+
+        protected virtual MelonPreferences_Entry<string> VrmPath { get; private set; }
+
+        protected virtual CharaData CharaData { get; private set; }
+
+        protected virtual RuntimeAnimatorController RuntimeAnimatorController { get; private set; }
 
         public override void OnInitializeMelon()
         {
+            CurrentVersion = MelonAssembly.Assembly
+                .GetCustomAttribute<MelonInfoAttribute>()
+                ?.Version ?? "Unknown";
+
+            Logger = new MelonLoaderLogger(LoggerInstance);
+            VersionChecker = new GitHubVersionChecker(REPOSITORY_NAME, Logger);
+
             // Initialize your preferences
-            _settings = MelonPreferences.CreateCategory("settings");
-            _vrmPath = _settings.CreateEntry("vrmPath", "");
+            Settings = MelonPreferences.CreateCategory("settings");
+            VrmPath = Settings.CreateEntry("vrmPath", "");
 
-            // Kick off the version check in the background
-            // so we don't block Unity's main thread.
-            CheckForUpdates();
-        }
+            var hasLatestVersion = VersionChecker.IsLatestVersionInstalled(CurrentVersion);
 
-        /// <summary>
-        /// Checks the GitHub tags endpoint for the latest version. 
-        /// If the local version is behind, displays a message.
-        /// </summary>
-        private void CheckForUpdates()
-        {
-            try
+            if (!hasLatestVersion)
             {
-                using (HttpClient client = new HttpClient())
+                Logger.Info($"[VersionCheck] New version available");
+
+                DialogResult result = System.Windows.Forms.MessageBox.Show(
+                    $"A new version of the custom avatar loader is available - do you want to download it?",
+                    "Update Available",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                switch (result)
                 {
-                    MelonLogger.Msg($"[VersionCheck] Current version: {CurrentVersion}");
-
-                    MelonLogger.Msg($"[VersionCheck] Checking for updates...");
-
-                    // GitHub API requires a user-agent
-                    client.DefaultRequestHeaders.UserAgent.Add(
-                        new ProductInfoHeaderValue("DesktopMate-Mod", CurrentVersion));
-
-                    // Fetch the tags from your GitHub repo
-                    string json = client.GetStringAsync(
-                        "https://api.github.com/repos/YusufOzmen01/desktopmate-custom-avatar-loader/tags").Result;
-
-                    // Deserialize the JSON array of tag objects
-                    List<GitHubTag> tags = JsonSerializer.Deserialize<List<GitHubTag>>(json);
-
-                    if (tags == null || tags.Count == 0)
-                    {
-                        return;
-                    }
-
-                    // Find the latest version by comparing the numeric parts
-                    Version latestVersion = GetLatestVersion(tags);
-
-                    // Compare it to our local version
-                    var localVersion = new Version(CurrentVersion);
-
-                    if (latestVersion > localVersion)
-                    {
-                        MelonLogger.Msg($"[VersionCheck] New version available: {latestVersion}");
-
-                        DialogResult result = System.Windows.Forms.MessageBox.Show(
-                            $"A new version of the custom avatar loader is available - do you want to download it?",
-                            "Update Available",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question
-                        );
-
-                        if (result == DialogResult.Yes)
+                    case DialogResult.Yes:
                         {
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
-                                FileName = "https://github.com/YusufOzmen01/desktopmate-custom-avatar-loader/releases",
+                                FileName = $"https://github.com/{REPOSITORY_NAME}/releases",
                                 UseShellExecute = true
                             });
+
+                            break;
                         }
-                        else if (result == DialogResult.No)
+
+                    case DialogResult.No:
                         {
-                            MelonLogger.Msg("[VersionCheck] User chose to skip update for now.");
+                            Logger.Info("[VersionCheck] User chose to skip update for now.");
+                            break;
                         }
-                        else if (result == DialogResult.Cancel)
-                        {
-                            MelonLogger.Msg("[VersionCheck] User chose to skip this version.");
-                        }
-                    }
-                    else
-                    {
-                        MelonLogger.Msg($"[VersionCheck] Latest version installed");
-                    }
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MelonLogger.Error($"[VersionCheck] Error checking for updates: {ex.Message}");
+                Logger.Info("[VersionCheck] Latest version installed");
             }
         }
-
-        /// <summary>
-        /// Parse each tag's name (e.g. "v1.0.3") into a <see cref="System.Version"/> and return the highest.
-        /// </summary>
-        private Version GetLatestVersion(List<GitHubTag> tags)
-        {
-            Version highest = new Version(0, 0, 0);
-
-            foreach (var tag in tags)
-            {
-                // Some tags start with 'v' (e.g. "v1.0.3"), strip that out
-                string versionStr = tag.Name.StartsWith("v", StringComparison.OrdinalIgnoreCase)
-                    ? tag.Name.Substring(1)
-                    : tag.Name;
-
-                if (Version.TryParse(versionStr, out Version parsed))
-                {
-                    if (parsed > highest)
-                        highest = parsed;
-                }
-            }
-
-            return highest;
-        }
-
-        // F4 and other logic from your original code
 
         public override void OnUpdate()
         {
@@ -155,22 +89,22 @@ namespace CustomAvatarLoader
                 string path = FileHelper.OpenFileDialog();
                 if (!string.IsNullOrEmpty(path) && LoadCharacter(path))
                 {
-                    _vrmPath.Value = path;
-                    _init = true;
+                    VrmPath.Value = path;
+                    init = true;
                     MelonPreferences.Save();
                 }
             }
 
-            if (!_init && GameObject.Find("/CharactersRoot").transform.GetChild(0) != null)
+            if (!init && GameObject.Find("/CharactersRoot").transform.GetChild(0) != null)
             {
-                _init = true;
-                if (_vrmPath.Value != "") LoadCharacter(_vrmPath.Value);
+                init = true;
+                if (VrmPath.Value != "") LoadCharacter(VrmPath.Value);
             }
 
-            if (!_init || GameObject.Find("/CharactersRoot/VRMFILE") != null || _vrmPath.Value == "")
+            if (!init || GameObject.Find("/CharactersRoot/VRMFILE") != null || VrmPath.Value == "")
                 return;
 
-            _vrmPath.Value = "";
+            VrmPath.Value = "";
             MelonPreferences.Save();
         }
 
@@ -212,8 +146,8 @@ namespace CustomAvatarLoader
             }
 
             var chara = GameObject.Find("/CharactersRoot").transform.GetChild(0).gameObject;
-            _charaData = chara.GetComponent<CharaData>();
-            _runtimeAnimatorController = chara.GetComponent<Animator>().runtimeAnimatorController;
+            CharaData = chara.GetComponent<CharaData>();
+            RuntimeAnimatorController = chara.GetComponent<Animator>().runtimeAnimatorController;
 
             LoggerInstance.Msg("Chara copied! Removing default chara...");
             UnityEngine.Object.Destroy(chara);
@@ -221,7 +155,7 @@ namespace CustomAvatarLoader
             newChara.transform.parent = GameObject.Find("/CharactersRoot").transform;
 
             CharaData newCharaData = newChara.AddComponent<CharaData>();
-            CopyCharaData(_charaData, newCharaData);
+            CopyCharaData(CharaData, newCharaData);
 
             MainManager manager = GameObject.Find("MainManager").GetComponent<MainManager>();
             manager.charaData = newCharaData;
@@ -229,7 +163,7 @@ namespace CustomAvatarLoader
             Animator charaAnimator = newChara.GetComponent<Animator>();
             charaAnimator.applyRootMotion = true;
             charaAnimator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
-            charaAnimator.runtimeAnimatorController = _runtimeAnimatorController;
+            charaAnimator.runtimeAnimatorController = RuntimeAnimatorController;
 
             LoggerInstance.Msg("Chara replaced!");
 
@@ -253,15 +187,5 @@ namespace CustomAvatarLoader
             target.strokedSittingAnim = source.strokedSittingAnim;
             target.strokedStandingAnim = source.strokedStandingAnim;
         }
-    }
-
-    /// <summary>
-    /// Represents just enough JSON fields from GitHub's Tag API response for our usage.
-    /// </summary>
-    public class GitHubTag
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-        // We ignore other fields not relevant to the version check.
     }
 }

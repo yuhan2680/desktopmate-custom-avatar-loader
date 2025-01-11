@@ -414,8 +414,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="AssemblyInfo.cs" />
 		<Compile Include="Core.cs" />
 		<Compile Include="FileHelper.cs" />
+		<Compile Include="Logging\ILogger.cs" />
+		<Compile Include="Logging\MelonLoaderLogger.cs" />
+		<Compile Include="Versioning\GitHubTag.cs" />
+		<Compile Include="Versioning\GitHubVersionChecker.cs" />
 	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
