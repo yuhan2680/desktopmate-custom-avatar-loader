@@ -1,8 +1,8 @@
-# Загрузик кастом модели в Desktop Mate
+# Загрузчик сторонних моделей в Desktop Mate
 
 <div align="center">
-Ты можешь поддержать мою работу и купить мне кофе<br>
-Также ты можешь зайти в наш дискорд сервер!<br>
+Вы можете поддержать мою работу и купить мне кофе<br>
+Также Вы можете зайти на наш дискорд сервер!<br>
 <a href="https://buymeacoffee.com/sergiomarquina">
 <img src="https://i.imgur.com/l7NBjqk.png" alt="drawing" width="150" height="45" align="center">
 </a>
@@ -11,29 +11,30 @@
 </a>
   <br><br>
 </div>
-Этот мод дает тебе загрузить .VRM файл в Desktop Mate
+Этот мод позволяет вам использовать любую модель формата .VRM в Desktop Mate!
 
 ## Установка
-- Установи последнюю версию [MelonLoader](https://github.com/LavaGang/MelonLoader/releases/download/v0.6.6/MelonLoader.Installer.exe) для DesktopMate (рекомендуется v0.6.6)
-- Установи .NET Runtime 6.0 с [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-6.0.36-windows-x64-installer)
-- Установи [Custom Avatar Loader.zip](https://github.com/YusufOzmen01/desktopmate-custom-avatar-loader/releases/latest/download/CustomAvatarLoader.zip) из релизов справа 
-- Перемести содержимое **в папку с Desktop Mate**
+- Установите последнюю версию [MelonLoader](https://github.com/LavaGang/MelonLoader/releases/download/v0.6.6/MelonLoader.Installer.exe) для DesktopMate (v0.6.6 рекомендуется)
+- Установите .NET Runtime 6.0 с [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-6.0.36-windows-x64-installer)
+- Установите [Custom Avatar Loader.zip](https://github.com/YusufOzmen01/desktopmate-custom-avatar-loader/releases/latest/download/CustomAvatarLoader.zip) в разделе "Releases" справа 
+- Переместите содержимое **в папку с Desktop Mate**
 
 ## Использование
-- Первоначальная загрузка займет какое время , так что подожди
-- После загрузки наводишь на персонажа и нажимаешь F4
-- Откроется проводник и выбираешь там свой VRM файл (убедись что есть разрешение и что в пути нет кириллицы)
-- И твоя моделька появится сразу же
+- Первоначальная загрузка займет некоторое время, IL2CPP нужно декомпилировать бинарник игры
+- После этого, тыкните на персонажа и нажмите F4
+- Откроется выбор файла. Выберите любой предпочтительный VRM файл (убедитесь что права у папки настроены корректно / в пути к файлу нет кириллицы)
+- И ваша модель должна появиться сразу!
 
-### Также ты можешь посмотреть видео [отсюда](https://youtu.be/CqjfT6QzRLM)
+### Также, вы можете посмотреть видео туториал [здесь](https://youtu.be/CqjfT6QzRLM) (На английском языке)
 
-## Для разработчиков
-- Убедитесь, что у вас установлены .NET Runtime 6.0 и .NET Desktop Support для Visual Studio.
-- Также , установите [MelonLoader's VSIX](https://github.com/TrevTV/MelonLoader.VSWizard/releases) для разработки модов
+## На заметку разработчикам
+- Убедитесь, что у вас есть .NET Runtime 6.0 и .NET Desktop Support для Visual Studio.
+- Установите [MelonLoader's VSIX](https://github.com/TrevTV/MelonLoader.VSWizard/releases) для разработки модов
+- Также, возможно понадобится установить Desktop Mate в раздел C, поскольку программа может себя вести непредсказуемо
 
 # Линцензия
-Подробности проверьте в файле  [LICENSE.md](LICENSE.md) 
+Просмотрите файл [LICENSE.md](LICENSE.md) для подробностей 
 
 
 
-Перевел на русский: [AR34](https://github.com/ArThirtyFour)
+Перевели на русский: [AR34](https://github.com/ArThirtyFour) / [neppedboy](https://github.com/neppedboy)
