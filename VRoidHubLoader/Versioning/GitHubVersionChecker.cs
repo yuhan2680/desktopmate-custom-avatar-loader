@@ -20,46 +20,39 @@ public class GitHubVersionChecker
     {
         try
         {
-            using (HttpClient client = new HttpClient())
+            using HttpClient client = new();
+        
+            Logger.Info($"[VersionCheck] Current version: {currentVersion}");
+
+            Logger.Info($"[VersionCheck] Checking for updates...");
+            
+            client.DefaultRequestHeaders.UserAgent.Add(
+                new ProductInfoHeaderValue("DesktopMate-Mod", currentVersion));
+
+            string json = client.GetStringAsync(
+                $"https://api.github.com/repos/{RepositoryName}/tags").GetAwaiter().GetResult();
+            
+            List<GitHubTag> tags = JsonSerializer.Deserialize<List<GitHubTag>>(json);
+
+            if (tags == null || tags.Count == 0)
             {
-                Logger.Info($"[VersionCheck] Current version: {currentVersion}");
-
-                Logger.Info($"[VersionCheck] Checking for updates...");
-
-                // GitHub API requires a user-agent
-                client.DefaultRequestHeaders.UserAgent.Add(
-                    new ProductInfoHeaderValue("DesktopMate-Mod", currentVersion));
-
-                // Fetch the tags from your GitHub repo
-                string json = client.GetStringAsync(
-                    $"https://api.github.com/repos/{RepositoryName}/tags").Result;
-
-                // Deserialize the JSON array of tag objects
-                List<GitHubTag> tags = JsonSerializer.Deserialize<List<GitHubTag>>(json);
-
-                if (tags == null || tags.Count == 0)
-                {
-                    // For now just return true if we can't find any tags
-                    return true;
-                }
-
-                // Find the latest version by comparing the numeric parts
-                Version latestVersion = GetLatestVersion(tags);
-
-                // Compare it to our local version
-                var localVersion = new Version(currentVersion);
-
-                return localVersion >= latestVersion;
+                // For now just return true if we can't find any tags
+                return true;
             }
+            
+            Version latestVersion = GetLatestVersion(tags);
+
+            var localVersion = new Version(currentVersion);
+
+            return localVersion >= latestVersion;
         }
         catch (Exception ex)
         {
             Logger.Error("[VersionCheck] Error checking for updates", ex);
-
             return true;
         }
     }
-
+    
     protected virtual Version GetLatestVersion(List<GitHubTag> tags)
     {
         Version highest = new Version(0, 0, 0);
