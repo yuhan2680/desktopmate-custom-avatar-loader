@@ -29,6 +29,7 @@ public class Core : MelonMod
     private Updater Updater { get; set; }
     
     private FileHelper FileHelper { get; set; }
+    private VrmLoader VrmLoader { get; set; }
     
     private CharaLoader CharaLoader { get; set; }
 
@@ -46,7 +47,8 @@ public class Core : MelonMod
         VersionChecker = new GitHubVersionChecker(RepositoryName, Logger);
         Updater = new Updater(RepositoryName, Logger);
         FileHelper = new FileHelper();
-        CharaLoader = new CharaLoader(Logger);
+        VrmLoader = new VrmLoader(Logger);
+        CharaLoader = new CharaLoader(Logger, VrmLoader);
 
         if (CurrentVersion == "0")
             Logger.Warn("CurrentVersion is 0, faulty module version?");

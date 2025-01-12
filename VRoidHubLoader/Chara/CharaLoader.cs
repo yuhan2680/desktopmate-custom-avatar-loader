@@ -1,4 +1,5 @@
-﻿using CustomAvatarLoader.Modules;
+﻿using CustomAvatarLoader.Helpers;
+using CustomAvatarLoader.Modules;
 using Il2Cpp;
 using Il2CppUniGLTF;
 using Il2CppUniVRM10;
@@ -10,51 +11,23 @@ namespace CustomAvatarLoader.Chara;
 public class CharaLoader
 {
     private ILogger _logger;
+    private VrmLoader _vrmLoader;
     private CharaData CharaData { get; set; }
-
     private RuntimeAnimatorController RuntimeAnimatorController { get; set; }
 
     public IList<IModule> Modules { get; } = new List<IModule>();
 
-    public CharaLoader(ILogger logger)
+    public CharaLoader(ILogger logger, VrmLoader vrmLoader)
     {
         _logger = logger;
+        _vrmLoader = vrmLoader;
     }
     
     public bool LoadCharacter(string path)
     {
         if (!File.Exists(path))
         {
-            _logger.Error("VRM file does not exist: " + path);
-            return false;
-        }
-
-        GameObject newChara;
-        try
-        {
-            var data = new GlbFileParser(path).Parse();
-            var vrmdata = Vrm10Data.Parse(data);
-            if (vrmdata == null)
-            {
-                MigrationData migrationData;
-                Vrm10Data.Migrate(data, out vrmdata, out migrationData);
-                if (vrmdata == null)
-                {
-                    throw new Exception("Cannot load vrm file!");
-                }
-            }
-
-            var context = new Vrm10Importer(vrmdata);
-            var loaded = context.Load();
-
-            loaded.EnableUpdateWhenOffscreen();
-            loaded.ShowMeshes();
-            loaded.gameObject.name = "VRMFILE";
-            newChara = loaded.gameObject;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error("Error trying to load the VRM file!", ex);
+            _logger.Error("[Chara Loader] VRM file does not exist: " + path);
             return false;
         }
 
@@ -62,8 +35,16 @@ public class CharaLoader
         CharaData = chara.GetComponent<CharaData>();
         RuntimeAnimatorController = chara.GetComponent<Animator>().runtimeAnimatorController;
 
-        _logger.Debug("Chara copied! Removing default chara...");
+        _logger.Debug("Character attributes have been copied. Removing existing character...");
         UnityEngine.Object.Destroy(chara);
+
+        GameObject newChara = _vrmLoader.LoadVrmIntoScene(path);
+        if (newChara == null)
+        {
+            _logger.Error("[Chara Loader] Failed to load VRM file: " + path);
+            
+            return false;
+        }
 
         newChara.transform.parent = GameObject.Find("/CharactersRoot").transform;
 
@@ -78,7 +59,7 @@ public class CharaLoader
         charaAnimator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
         charaAnimator.runtimeAnimatorController = RuntimeAnimatorController;
 
-        _logger.Debug("Chara replaced!");
+        _logger.Debug("Character attribute replacement succeeded!");
 
         return true;
     }
