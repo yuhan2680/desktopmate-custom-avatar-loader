@@ -12,11 +12,11 @@ public class GitHubVersionChecker
         Logger = logger;
     }
 
-    protected virtual string RepositoryName { get; }
+    private string RepositoryName { get; }
 
-    protected virtual ILogger Logger { get; }
+    private ILogger Logger { get; }
 
-    public virtual bool IsLatestVersionInstalled(string currentVersion)
+    public bool IsLatestVersionInstalled(string currentVersion)
     {
         try
         {
@@ -52,8 +52,8 @@ public class GitHubVersionChecker
             return true;
         }
     }
-    
-    protected virtual Version GetLatestVersion(List<GitHubTag> tags)
+
+    private Version GetLatestVersion(List<GitHubTag> tags)
     {
         Version highest = new Version(0, 0, 0);
 
