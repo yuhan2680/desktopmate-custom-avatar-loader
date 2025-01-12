@@ -1,18 +1,24 @@
 ﻿namespace CustomAvatarLoader;
 
 using CustomAvatarLoader.Logging;
+using CustomAvatarLoader.Modules;
 using CustomAvatarLoader.Versioning;
 using Il2Cpp;
 using Il2CppUniGLTF;
 using Il2CppUniVRM10;
 using MelonLoader;
-using System.Reflection;
-using System.Windows.Forms;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class Core : MelonMod
 {
     private bool init;
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern int MessageBox(IntPtr hWnd, String text, String caption, uint type);
+
+    protected virtual IServiceProvider Services { get; }
 
     protected const string REPOSITORY_NAME = "YusufOzmen01/desktopmate-custom-avatar-loader";
 
@@ -30,11 +36,11 @@ public class Core : MelonMod
 
     protected virtual RuntimeAnimatorController RuntimeAnimatorController { get; private set; }
 
+    public IList<IModule> Modules { get; } = new List<IModule>();
+
     public override void OnInitializeMelon()
     {
-        CurrentVersion = MelonAssembly.Assembly
-            .GetCustomAttribute<MelonInfoAttribute>()
-            ?.Version ?? "Unknown";
+        CurrentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         Logger = new MelonLoaderLogger(LoggerInstance);
         VersionChecker = new GitHubVersionChecker(REPOSITORY_NAME, Logger);
@@ -45,16 +51,16 @@ public class Core : MelonMod
 
         var hasLatestVersion = VersionChecker.IsLatestVersionInstalled(CurrentVersion);
 
-       if (!hasLatestVersion)
+        if (!hasLatestVersion)
         {
             Logger.Info("[VersionCheck] New version available");
 
             const uint MB_YESNO = 0x00000004;
             const uint MB_ICONQUESTION = 0x00000020;
 
-            int result = MessageBox(IntPtr.Zero, 
-                "A new version of the custom avatar loader is available - do you want to download it?", 
-                "Update Available", 
+            int result = MessageBox(IntPtr.Zero,
+                "A new version of the custom avatar loader is available - do you want to download it?",
+                "Update Available",
                 MB_YESNO | MB_ICONQUESTION);
 
             switch (result)
@@ -76,6 +82,7 @@ public class Core : MelonMod
         {
             Logger.Info("[VersionCheck] Latest version installed");
         }
+    }
 
     public override void OnUpdate()
     {

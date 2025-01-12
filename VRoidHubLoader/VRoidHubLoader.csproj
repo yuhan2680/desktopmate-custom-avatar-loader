@@ -6,12 +6,13 @@
 		<RootNamespace>CustomAvatarLoader</RootNamespace>
 		<LangVersion>default</LangVersion>
 		<IsPackable>false</IsPackable>
-		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<FileVersion>1.0.0.0</FileVersion>
+		<AssemblyVersion>1.0.4</AssemblyVersion>
+		<FileVersion>1.0.4</FileVersion>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<AssemblyName>CustomAvatarLoader</AssemblyName>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
+    	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -140,9 +141,6 @@
 		</Reference>
 		<Reference Include="Il2Cpp__Generated">
 			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Desktop Mate\MelonLoader\Il2CppAssemblies\Il2Cpp__Generated.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Windows.Forms">
-		  <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Desktop Mate\UserLibs\System.Windows.Forms.dll</HintPath>
 		</Reference>
 		<Reference Include="Unity.2D.Animation.Runtime">
 			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Desktop Mate\MelonLoader\Il2CppAssemblies\Unity.2D.Animation.Runtime.dll</HintPath>
@@ -419,8 +417,15 @@
 		<Compile Include="FileHelper.cs" />
 		<Compile Include="Logging\ILogger.cs" />
 		<Compile Include="Logging\MelonLoaderLogger.cs" />
+		<Compile Include="Modules\IModule.cs" />
+		<Compile Include="Modules\VrmLoaderModule.cs" />
 		<Compile Include="Versioning\GitHubTag.cs" />
 		<Compile Include="Versioning\GitHubVersionChecker.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.2" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
 	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
