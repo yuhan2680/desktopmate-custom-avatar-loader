@@ -1,4 +1,6 @@
-﻿namespace CustomAvatarLoader;
+﻿using CustomAvatarLoader.Settings;
+
+namespace CustomAvatarLoader;
 
 using CustomAvatarLoader.Helpers;
 using CustomAvatarLoader.Modules;
@@ -11,8 +13,10 @@ using Versioning;
 public class Core : MelonMod
 {
     protected const string RepositoryName = "YusufOzmen01/desktopmate-custom-avatar-loader";
-    
+
     protected virtual ILogger Logger { get; private set; }
+
+    protected virtual ISettingsProvider SettingsProvider { get; private set; }
 
     protected virtual IServiceProvider ServiceProvider { get; private set; }
 
@@ -26,6 +30,7 @@ public class Core : MelonMod
 
         Modules = ServiceProvider.GetServices<IModule>();
         Logger = ServiceProvider.GetService<ILogger>();
+        SettingsProvider = ServiceProvider.GetService<ISettingsProvider>();
 
         var versionChecker = new GitHubVersionChecker(RepositoryName, Logger);
         var updater = new Updater(RepositoryName, Logger);
@@ -36,7 +41,7 @@ public class Core : MelonMod
         {
             Logger.Warn("CurrentVersion is 0, faulty module version?");
         }
-        
+
         var hasLatestVersion = versionChecker.IsLatestVersionInstalled(currentVersion);
 
         if (!hasLatestVersion)
@@ -48,6 +53,19 @@ public class Core : MelonMod
             Logger.Info("[VersionCheck] Latest version installed");
         }
 
+        WindowHelper.SetWindowForeground(WindowHelper.GetUnityGameHwnd());
+
+        var playerLogManager = new PlayerLogManager(SettingsProvider, Logger);
+
+        string logPath = Path.Join(Environment.GetEnvironmentVariable("USERPROFILE"), "Appdata", "LocalLow",
+            "infiniteloop", "DesktopMate");
+
+        string playerLog = Path.Join(logPath, "Player.log");
+        string playerPrevLog = Path.Join(logPath, "Player-prev.log");
+
+        playerLogManager.ClearLog(playerLog);
+        playerLogManager.ClearLog(playerPrevLog);
+        
         foreach (var module in Modules)
         {
             module.OnInitialize();
@@ -57,7 +75,8 @@ public class Core : MelonMod
     protected virtual void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton(typeof(MelonLogger.Instance), LoggerInstance);
-        services.AddScoped(typeof(Logging.ILogger), typeof(MelonLoaderLogger));
+        services.AddSingleton(typeof(ISettingsProvider), new MelonLoaderSettings("settings"));
+        services.AddScoped(typeof(ILogger), typeof(MelonLoaderLogger));
         services.AddScoped(typeof(IModule), typeof(VrmLoaderModule));
     }
 
